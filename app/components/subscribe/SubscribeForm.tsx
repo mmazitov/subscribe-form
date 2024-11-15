@@ -45,10 +45,10 @@ const SubscribeForm: React.FC = () => {
 				setMessage('Вы успешно подписались на рассылку!');
 				setEmail('');
 			} else {
-				setMessage(data.error || 'Что-то пошло не так. Попробуйте снова.');
+				setError(data.error || 'Что-то пошло не так. Попробуйте снова.');
 			}
 		} catch (error) {
-			setMessage('Что-то пошло не так. Попробуйте снова.');
+			setError('Что-то пошло не так. Попробуйте снова.');
 		}
 	};
 
