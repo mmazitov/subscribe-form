@@ -1,0 +1,14 @@
+.subscribe-form h2 {
+	font:
+		600
+		clamp(84px, 1.5rem, 50px) / clamp(110px, 1.5rem, 50px) Arial,
+		Helvetica,
+		sans-serif;
+}
+
+.subscribe-form p {
+	font:
+		clamp(24px, 1rem, 16px) / clamp(43px, 1rem, 16px) Arial,
+		Helvetica,
+		sans-serif;
+}
