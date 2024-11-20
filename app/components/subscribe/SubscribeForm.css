@@ -1,7 +1,6 @@
 .subscribe-form h2 {
 	font:
-		600
-		clamp(84px, 1.5rem, 50px) / clamp(110px, 1.5rem, 50px) Arial,
+		600 clamp(84px, 1.5rem, 50px) / clamp(110px, 1.5rem, 50px) Arial,
 		Helvetica,
 		sans-serif;
 }

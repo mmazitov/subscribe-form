@@ -2,74 +2,66 @@ import prisma from '@/app/lib/db';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
-// Импортируем PrismaClient
-
+// Handles POST requests to the `/api/subscribe/` endpoint
 export async function POST(req: Request) {
 	try {
+		// Parse email from the request body
 		const { email } = await req.json();
 
+		// Validate email format
 		if (!email || !email.includes('@')) {
-			return NextResponse.json(
-				{ error: 'Введите корректный email.' },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
 		}
 
-		// Логика для сохранения email в базу данных
+		// Check if the email already exists in the database
 		const existingEmail = await prisma.emailRecord.findUnique({
 			where: {
 				email,
 			},
 		});
 
+		// Return error if the email already exists
 		if (existingEmail) {
-			return NextResponse.json(
-				{ error: 'Этот email уже подписан на рассылку.' },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: 'Already exist' }, { status: 400 });
 		}
 
-		// Сохраняем email в базу данных
+		// Save the email in the database
 		await prisma.emailRecord.create({
 			data: {
 				email,
 			},
 		});
 
-		// Настройка Nodemailer
+		// Set up Nodemailer transporter with email credentials
 		const transporter = nodemailer.createTransport({
-			service: 'gmail', // Или другой email-сервис
+			service: 'gmail', // Email service provider
 			auth: {
-				user: process.env.EMAIL_USER, // Ваш email
-				pass: process.env.EMAIL_PASS, // Пароль/ключ приложения
+				user: process.env.EMAIL_USER, // Sender's email address
+				pass: process.env.EMAIL_PASS, // App password for the email account
 			},
 		});
 
-		// Отправка письма админу
+		// Send notification email to the admin
 		await transporter.sendMail({
-			from: process.env.EMAIL_USER, // Отправитель
-			to: 'mazitov.nikolya@gmail.com', // Почта администратора
-			subject: 'Новый подписчик на рассылку', // Тема письма
-			text: `На ваш сайт подписался новый пользователь: ${email}`, // Текст письма
+			from: process.env.EMAIL_USER, // Sender's email address
+			to: process.env.EMAIL_ADMIN, // Admin's email address
+			subject: 'New Subscriber', // Email subject
+			text: `New Subscriber: ${email}`, // Email body
 		});
 
-		// Отправка письма подписчику
+		// Send confirmation email to the subscriber
 		await transporter.sendMail({
-			from: process.env.EMAIL_USER, // Отправитель
-			to: email, // Почта подписчика
-			subject: 'Подтверждение подписки на рассылку', // Тема письма
-			text: `Здравствуйте! Вы успешно подписались на нашу рассылку. Спасибо, что с нами!`, // Текст письма
+			from: process.env.EMAIL_USER, // Sender's email address
+			to: email, // Subscriber's email address
+			subject: 'Subscribed', // Email subject
+			text: `Thanks for subscribe`, // Email body
 		});
 
-		return NextResponse.json(
-			{ message: 'Подписка успешно оформлена!' },
-			{ status: 200 },
-		);
+		// Respond with success message
+		return NextResponse.json({ message: 'Success' }, { status: 200 });
 	} catch (error) {
-		console.error('Ошибка при обработке подписки:', error);
-		return NextResponse.json(
-			{ error: 'Произошла ошибка. Попробуйте позже.' },
-			{ status: 500 },
-		);
+		// Log and handle any server errors
+		console.error('Something went wrong', error);
+		return NextResponse.json({ error: 'Error' }, { status: 500 });
 	}
 }
